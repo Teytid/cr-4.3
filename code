@@ -1,0 +1,216 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Security;
+using System.Threading.Tasks;
+
+namespace SR_4._3
+{
+    internal class Program
+
+    {
+        public static string directory = "/Users/alisasalnikova/Downloads/Книги";
+        public static void Changing(string path, Dictionary<char, string> replacement) 
+        { 
+            string text = ""; 
+
+            string[] pathSplit = path.Split(new char[] { '/', '\\' }); 
+            string name = pathSplit.Last();
+            int textLength = 0;
+
+            try
+            {
+                text = File.ReadAllText(path);
+                textLength = text.Length;
+            }
+            catch (IOException)
+            {
+                Console.WriteLine("Ошибка ввода-вывода!");
+            }
+            catch (SecurityException)
+            {
+                Console.WriteLine("Ошибка безопасности");
+            }
+            catch (AccessViolationException)
+            {
+                Console.WriteLine("Ошибка доступа");
+            }
+
+            string[] textNew = new string[text.Length]; 
+
+            for (int i = 0; i < text.Length; i++) 
+            { 
+                char current = text[i]; 
+
+                if(Char.IsLetter(current)) 
+                { 
+                    if (replacement.ContainsKey(current))
+                    {
+                        textNew[i] = replacement[current];
+                    } 
+                } 
+                else
+                {
+                    textNew[i] = current.ToString();
+                } 
+            } 
+
+            text = string.Join("", textNew); 
+
+            try 
+            { 
+                pathSplit[pathSplit.Length - 1] = "new_" + pathSplit[pathSplit.Length - 1]; 
+                File.WriteAllText(string.Join("/", pathSplit), text); 
+            } 
+            catch (IOException)
+            {
+                Console.WriteLine("Ошибка ввода-вывода!");
+            }
+            catch (SecurityException)
+            {
+                Console.WriteLine("Ошибка безопасности");
+            }
+            catch (AccessViolationException)
+            {
+                Console.WriteLine("Ошибка доступа");
+            }
+
+            Console.WriteLine($"File {name} went from {textLength} to {text.Length} characters."); 
+        }
+        static void Single() 
+        { 
+            
+            Stopwatch stopwatch = new Stopwatch(); 
+
+            stopwatch.Start(); 
+
+            try 
+            { 
+                foreach (var file in Directory.GetFiles(directory)) 
+                { 
+                    if (!file.Contains("new")) 
+                    { 
+                        Changing(file, Replacement); 
+                    } 
+                } 
+            } 
+            catch (IOException)
+            {
+                Console.WriteLine("Ошибка ввода-вывода!");
+            }
+            catch (SecurityException)
+            {
+                Console.WriteLine("Ошибка безопасности");
+            }
+            catch (AccessViolationException)
+            {
+                Console.WriteLine("Ошибка доступа");
+            }
+
+            stopwatch.Stop(); 
+
+            Console.WriteLine($"Files processed consequently in {stopwatch.Elapsed} seconds.\n"); 
+        }
+        static void Multi() 
+        {
+            List<Task> tasks = new List<Task>(); 
+
+            Stopwatch stopwatch = new Stopwatch(); 
+            try 
+            { 
+                foreach (var file in Directory.GetFiles(directory)) 
+                { 
+                    if (!file.Contains("new")) 
+                    { 
+                        tasks.Add(Task.Run(() => Changing(file, Replacement))); 
+                    } 
+                } 
+            } 
+            catch (IOException)
+            {
+                Console.WriteLine("Ошибка ввода-вывода!");
+            }
+            catch (SecurityException)
+            {
+                Console.WriteLine("Ошибка безопасности");
+            }
+            catch (AccessViolationException)
+            {
+                Console.WriteLine("Ошибка доступа");
+            }
+
+            Task endTask = Task.WhenAll(tasks); 
+
+            stopwatch.Start(); 
+
+            endTask.Wait(); 
+
+            stopwatch.Stop(); 
+
+            Console.WriteLine($"Files processed asynchronously in {stopwatch.Elapsed} seconds.\n"); 
+        }
+        static private readonly Dictionary<char, string> Replacement = new Dictionary<char, string> 
+        { 
+            ['A'] = "А", 
+            ['B'] = "Б", 
+            ['C'] = "Ц", 
+            ['D'] = "Д", 
+            ['E'] = "Е", 
+            ['F'] = "Ф", 
+            ['G'] = "Г", 
+            ['H'] = "Х", 
+            ['I'] = "И", 
+            ['J'] = "Ж", 
+            ['K'] = "К", 
+            ['L'] = "Л", 
+            ['M'] = "М", 
+            ['N'] = "Н", 
+            ['O'] = "О", 
+            ['P'] = "П", 
+            ['Q'] = "КУ", 
+            ['R'] = "Р", 
+            ['S'] = "С", 
+            ['T'] = "Т", 
+            ['U'] = "У", 
+            ['V'] = "В", 
+            ['W'] = "У", 
+            ['X'] = "КС", 
+            ['Y'] = "Ы", 
+            ['Z'] = "З", 
+            ['a'] = "а", 
+            ['b'] = "б", 
+            ['c'] = "ц", 
+            ['d'] = "д", 
+            ['e'] = "е", 
+            ['f'] = "ф", 
+            ['g'] = "г", 
+            ['h'] = "х", 
+            ['i'] = "и", 
+            ['j'] = "ж", 
+            ['k'] = "к", 
+            ['l'] = "л", 
+            ['m'] = "м", 
+            ['n'] = "н", 
+            ['o'] = "о", 
+            ['p'] = "п", 
+            ['q'] = "ку", 
+            ['r'] = "р", 
+            ['s'] = "с", 
+            ['t'] = "т", 
+            ['u'] = "у", 
+            ['v'] = "в", 
+            ['w'] = "у", 
+            ['x'] = "кс", 
+            ['y'] = "ы", 
+            ['z'] = "з", 
+        };
+        public static void Main()
+        {
+            Single();
+            Multi();
+            Console.ReadLine();
+        }
+    }
+}
